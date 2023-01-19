@@ -1,14 +1,37 @@
 import * as core from '@actions/core'
-import {wait} from './wait'
+import {Octokit} from '@octokit/rest'
 
 async function run(): Promise<void> {
   try {
-    const ms: string = core.getInput('milliseconds')
-    core.debug(`Waiting ${ms} milliseconds ...`) // debug is only output if you set the secret `ACTIONS_STEP_DEBUG` to true
+    const repository = core.getInput('repository')
+    const token = core.getInput('token').trim()
+    let owner = core.getInput('owner')
+    let repo = core.getInput('repo')
+    const ref = core.getInput('ref')
+    const excludes = core.getInput('excludes').trim().split(',')
 
-    core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
-    core.debug(new Date().toTimeString())
+    if (repository) {
+      ;[owner, repo] = repository.split('/')
+    }
+
+    const octokit = new Octokit({auth: token})
+
+    let releases = (await octokit.repos.listReleases({owner, repo, ref})).data
+
+    if (excludes.includes('prerelease')) {
+      releases = releases.filter(x => !x.prerelease)
+    }
+
+    if (excludes.includes('draft')) {
+      releases = releases.filter(x => !x.draft)
+    }
+
+    if (releases.length > 0) {
+      core.setOutput('release', releases[0].tag_name)
+      core.setOutput('id', releases[0].id.toString())
+    } else {
+      core.setFailed('No valid releases')
+    }
 
     core.setOutput('time', new Date().toTimeString())
   } catch (error) {
