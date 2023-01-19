@@ -1,11 +1,27 @@
-name: 'Your name here'
+name: 'Get Latest Release'
 description: 'Provide a description here'
-author: 'Your name or organization here'
+author: 'smorks'
 inputs:
-  milliseconds: # change this
-    required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+  owner:
+    description: 'The repository owner'
+    required: false
+  repo:
+    description: 'The repository name'
+    required: false
+  repository:
+    description: 'The repository name in full'
+    required: false
+  excludes:
+    description: 'Types of releases to exclude'
+    required: false
+  token:
+    description: 'Github token'
+    required: false
+outputs:
+  release:
+    description: 'Latest release name'
+  id:
+    description: 'Latest release id'
 runs:
   using: 'node16'
   main: 'dist/index.js'
