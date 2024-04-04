@@ -23,5 +23,5 @@ outputs:
   id:
     description: 'Latest release id'
 runs:
-  using: 'node16'
+  using: 'node20'
   main: 'dist/index.js'
